@@ -12,6 +12,8 @@ import { JsonFormatter } from "./components/tools/json-formatter";
 import { RegexTester } from "./components/tools/regex-tester";
 import { UuidGenerator } from "./components/tools/uuid-generator";
 import { Base64Converter } from "./components/tools/base64-converter";
+import { MarkdownPreviewer } from "./components/tools/markdown-previewer";
+import { JwtDebugger } from "./components/tools/jwt-debugger";
 
 const App = () => {
   // Create the query client inside the component function
@@ -30,9 +32,9 @@ const App = () => {
                 <Route path="/json" element={<JsonFormatter />} />
                 <Route path="/regex" element={<RegexTester />} />
                 <Route path="/uuid" element={<UuidGenerator />} />
-                <Route path="/markdown" element={<div className="p-8">Markdown Tool Coming Soon</div>} />
+                <Route path="/markdown" element={<MarkdownPreviewer />} />
                 <Route path="/base64" element={<Base64Converter />} />
-                <Route path="/jwt" element={<div className="p-8">JWT Tool Coming Soon</div>} />
+                <Route path="/jwt" element={<JwtDebugger />} />
                 <Route path="/converter" element={<div className="p-8">Converter Tool Coming Soon</div>} />
                 <Route path="/settings" element={<div className="p-8">Settings Coming Soon</div>} />
                 <Route path="*" element={<NotFound />} />
