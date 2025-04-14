@@ -1,4 +1,3 @@
-
 import { useState, useRef, ChangeEvent } from "react";
 import { ToolLayout } from "../tool-layout";
 import { Button } from "@/components/ui/button";
@@ -12,8 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeftRight, Copy, Download, Upload, FileJson, RefreshCw, FileText, FileSpreadsheet } from "lucide-react";
 import yaml from "js-yaml";
-import { parse as csvParse } from "csv-parse/sync";
-import { stringify as csvStringify } from "csv-stringify/sync";
+import Papa from "papaparse";
 import { js2xml, xml2js } from "xml-js";
 
 type ConversionFormat = "json" | "yaml" | "csv" | "xml" | "base64";
@@ -63,7 +61,7 @@ export function Converter() {
         if (!Array.isArray(jsonObj)) {
           throw new Error("JSON must be an array of objects to convert to CSV");
         }
-        result = csvStringify(jsonObj, { header: true });
+        result = Papa.unparse(jsonObj);
       } else if (inputFormat === "json" && outputFormat === "xml") {
         const jsonObj = JSON.parse(inputText);
         result = js2xml(jsonObj, { compact: true, spaces: prettyPrint ? 2 : 0 });
@@ -80,7 +78,7 @@ export function Converter() {
         if (!Array.isArray(yamlObj)) {
           throw new Error("YAML must be an array of objects to convert to CSV");
         }
-        result = csvStringify(yamlObj, { header: true });
+        result = Papa.unparse(yamlObj);
       } else if (inputFormat === "yaml" && outputFormat === "xml") {
         const yamlObj = yaml.load(inputText);
         result = js2xml(yamlObj, { compact: true, spaces: prettyPrint ? 2 : 0 });
@@ -90,14 +88,14 @@ export function Converter() {
       
       // CSV conversions
       else if (inputFormat === "csv" && outputFormat === "json") {
-        const records = csvParse(inputText, { columns: true });
-        result = JSON.stringify(records, null, prettyPrint ? 2 : 0);
+        const parsedResult = Papa.parse(inputText, { header: true });
+        result = JSON.stringify(parsedResult.data, null, prettyPrint ? 2 : 0);
       } else if (inputFormat === "csv" && outputFormat === "yaml") {
-        const records = csvParse(inputText, { columns: true });
-        result = yaml.dump(records, { indent: prettyPrint ? 2 : 0 });
+        const parsedResult = Papa.parse(inputText, { header: true });
+        result = yaml.dump(parsedResult.data, { indent: prettyPrint ? 2 : 0 });
       } else if (inputFormat === "csv" && outputFormat === "xml") {
-        const records = csvParse(inputText, { columns: true });
-        result = js2xml({ records }, { compact: true, spaces: prettyPrint ? 2 : 0 });
+        const parsedResult = Papa.parse(inputText, { header: true });
+        result = js2xml({ records: parsedResult.data }, { compact: true, spaces: prettyPrint ? 2 : 0 });
       } else if (inputFormat === "csv" && outputFormat === "base64") {
         result = btoa(inputText);
       }
