@@ -65,7 +65,7 @@ export function JsonFormatter() {
             Format
           </Button>
           <Button
-            variant={copied ? "outline" : "outline"}
+            variant="outline"
             onClick={handleCopy}
             disabled={!output}
             className="flex items-center gap-1"

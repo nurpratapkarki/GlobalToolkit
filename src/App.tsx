@@ -9,6 +9,8 @@ import { Layout } from "./components/layout";
 import HomePage from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { JsonFormatter } from "./components/tools/json-formatter";
+import { RegexTester } from "./components/tools/regex-tester";
+import { UuidGenerator } from "./components/tools/uuid-generator";
 
 const queryClient = new QueryClient();
 
@@ -23,8 +25,8 @@ const App = () => (
             <Route element={<Layout />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/json" element={<JsonFormatter />} />
-              <Route path="/regex" element={<div className="p-8">Regex Tool Coming Soon</div>} />
-              <Route path="/uuid" element={<div className="p-8">UUID Tool Coming Soon</div>} />
+              <Route path="/regex" element={<RegexTester />} />
+              <Route path="/uuid" element={<UuidGenerator />} />
               <Route path="/markdown" element={<div className="p-8">Markdown Tool Coming Soon</div>} />
               <Route path="/base64" element={<div className="p-8">Base64 Tool Coming Soon</div>} />
               <Route path="/jwt" element={<div className="p-8">JWT Tool Coming Soon</div>} />
