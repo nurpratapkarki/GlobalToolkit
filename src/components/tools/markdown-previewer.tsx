@@ -21,8 +21,16 @@ export function MarkdownPreviewer() {
     });
     
     try {
-      const rendered = marked.parse(markdown);
-      setHtml(rendered);
+      // Handle the potential Promise return type
+      const renderMarkdown = async () => {
+        const rendered = await marked.parse(markdown);
+        setHtml(rendered);
+      };
+      
+      renderMarkdown().catch(error => {
+        console.error("Error parsing markdown:", error);
+        setHtml("<p>Error parsing markdown</p>");
+      });
     } catch (error) {
       console.error("Error parsing markdown:", error);
       setHtml("<p>Error parsing markdown</p>");
