@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { FileJson, Code2, Hash, FileText, RefreshCw, KeyRound, Settings } from "lucide-react";
+import { FileJson, Code2, Hash, FileText, RefreshCw, KeyRound, Settings, ArrowRightLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ToolCardProps = {
@@ -74,9 +74,9 @@ const HomePage = () => {
       className: "border-red-200 dark:border-red-900",
     },
     {
-      title: "Unit Converter",
-      description: "Convert between different units",
-      icon: RefreshCw,
+      title: "Format Converter",
+      description: "Convert between JSON, YAML, CSV, XML",
+      icon: ArrowRightLeft,
       path: "/converter",
       className: "border-indigo-200 dark:border-indigo-900",
     },

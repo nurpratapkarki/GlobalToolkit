@@ -14,6 +14,8 @@ import { UuidGenerator } from "./components/tools/uuid-generator";
 import { Base64Converter } from "./components/tools/base64-converter";
 import { MarkdownPreviewer } from "./components/tools/markdown-previewer";
 import { JwtDebugger } from "./components/tools/jwt-debugger";
+import { Converter } from "./components/tools/converter";
+import { Settings } from "./components/tools/settings";
 
 const App = () => {
   // Create the query client inside the component function
@@ -35,8 +37,8 @@ const App = () => {
                 <Route path="/markdown" element={<MarkdownPreviewer />} />
                 <Route path="/base64" element={<Base64Converter />} />
                 <Route path="/jwt" element={<JwtDebugger />} />
-                <Route path="/converter" element={<div className="p-8">Converter Tool Coming Soon</div>} />
-                <Route path="/settings" element={<div className="p-8">Settings Coming Soon</div>} />
+                <Route path="/converter" element={<Converter />} />
+                <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
