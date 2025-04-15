@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,9 +15,10 @@ import { MarkdownPreviewer } from "./components/tools/markdown-previewer";
 import { JwtDebugger } from "./components/tools/jwt-debugger";
 import { Converter } from "./components/tools/converter";
 import { Settings } from "./components/tools/settings";
+import { ColorConverter } from "./components/tools/color-converter";
+import { ColorPalette } from "./components/tools/color-palette";
 
 const App = () => {
-  // Create the query client inside the component function
   const queryClient = new QueryClient();
 
   return (
@@ -38,6 +38,8 @@ const App = () => {
                 <Route path="/base64" element={<Base64Converter />} />
                 <Route path="/jwt" element={<JwtDebugger />} />
                 <Route path="/converter" element={<Converter />} />
+                <Route path="/color" element={<ColorConverter />} />
+                <Route path="/palette" element={<ColorPalette />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<NotFound />} />
               </Route>

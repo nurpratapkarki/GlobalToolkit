@@ -1,7 +1,6 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { FileJson, Code2, Hash, FileText, RefreshCw, KeyRound, Settings, ArrowRightLeft } from "lucide-react";
+import { FileJson, Code2, Hash, FileText, RefreshCw, KeyRound, Settings, ArrowRightLeft, Palette, PaintBucket } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ToolCardProps = {
@@ -86,6 +85,20 @@ const HomePage = () => {
       icon: Settings,
       path: "/settings",
       className: "border-gray-200 dark:border-gray-800",
+    },
+    {
+      title: "Color Converter",
+      description: "Convert between color formats",
+      icon: PaintBucket,
+      path: "/color",
+      className: "border-pink-200 dark:border-pink-900",
+    },
+    {
+      title: "Color Palette",
+      description: "Generate color palettes",
+      icon: Palette,
+      path: "/palette",
+      className: "border-violet-200 dark:border-violet-900",
     },
   ];
 
