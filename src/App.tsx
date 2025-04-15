@@ -17,6 +17,7 @@ import { Converter } from "./components/tools/converter";
 import { Settings } from "./components/tools/settings";
 import { ColorConverter } from "./components/tools/color-converter";
 import { ColorPalette } from "./components/tools/color-palette";
+import { CodeBeautifier } from "./components/tools/code-beautifier";
 
 const App = () => {
   const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => {
                 <Route path="/converter" element={<Converter />} />
                 <Route path="/color" element={<ColorConverter />} />
                 <Route path="/palette" element={<ColorPalette />} />
+                <Route path="/beautify" element={<CodeBeautifier />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<NotFound />} />
               </Route>

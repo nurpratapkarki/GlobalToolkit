@@ -100,6 +100,13 @@ const HomePage = () => {
       path: "/palette",
       className: "border-violet-200 dark:border-violet-900",
     },
+    {
+      title: "Code Beautifier",
+      description: "Minify and beautify your code",
+      icon: Code2,
+      path: "/beautify",
+      className: "border-emerald-200 dark:border-emerald-900",
+    },
   ];
 
   return (
