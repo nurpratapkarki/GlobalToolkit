@@ -94,20 +94,17 @@ export function CodeBeautifier() {
     try {
       let beautified = "";
       
-      // Basic beautification for different formats
+      // Improved beautification for different formats
       switch (format) {
         case "json":
+          // For JSON, we use JSON.stringify with indentation
+          const jsonObj = JSON.parse(input);
+          beautified = JSON.stringify(jsonObj, null, 2);
+          break;
+          
         case "js":
-          // For JSON and JS, we can use JSON.stringify with indentation
-          try {
-            // Try to parse it as JSON
-            const obj = JSON.parse(input);
-            beautified = JSON.stringify(obj, null, 2);
-          } catch {
-            // If it's not valid JSON, it might be JS
-            // Basic indentation for JS-like code
-            beautified = formatCode(input);
-          }
+          // Improved JS formatting - fix the broken logic
+          beautified = formatJavaScript(input);
           break;
           
         case "css":
@@ -134,22 +131,146 @@ export function CodeBeautifier() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to beautify code",
+        description: "Failed to beautify code. Make sure it's valid " + format.toUpperCase(),
         variant: "destructive",
       });
       setOutput("Error: " + (error instanceof Error ? error.message : String(error)));
     }
   };
 
-  // Basic code formatting function
-  const formatCode = (code: string) => {
+  // Improved JavaScript formatting function
+  const formatJavaScript = (code: string) => {
+    try {
+      // First try to parse as JSON, which is valid JavaScript
+      try {
+        const obj = JSON.parse(code);
+        return JSON.stringify(obj, null, 2);
+      } catch {
+        // Not valid JSON, continue with JS formatting
+      }
+      
+      // Basic indentation
+      let result = '';
+      let indentLevel = 0;
+      let inString = false;
+      let stringChar = '';
+      let escaped = false;
+      
+      // Process the code character by character
+      for (let i = 0; i < code.length; i++) {
+        const char = code[i];
+        const nextChar = code[i + 1] || '';
+        const prevChar = code[i - 1] || '';
+        
+        // Handle strings
+        if ((char === '"' || char === "'" || char === '`') && !escaped) {
+          if (inString && stringChar === char) {
+            inString = false;
+          } else if (!inString) {
+            inString = true;
+            stringChar = char;
+          }
+          result += char;
+          continue;
+        }
+        
+        // Handle escape characters in strings
+        if (char === '\\' && inString) {
+          escaped = !escaped;
+          result += char;
+          continue;
+        } else {
+          escaped = false;
+        }
+        
+        // Skip formatting inside strings
+        if (inString) {
+          result += char;
+          continue;
+        }
+        
+        // Handle block comments
+        if (char === '/' && nextChar === '*') {
+          const endComment = code.indexOf('*/', i + 2);
+          if (endComment !== -1) {
+            result += '/*' + code.substring(i + 2, endComment) + '*/';
+            i = endComment + 1;
+            continue;
+          }
+        }
+        
+        // Handle line comments
+        if (char === '/' && nextChar === '/') {
+          const endLine = code.indexOf('\n', i);
+          if (endLine !== -1) {
+            result += '//' + code.substring(i + 2, endLine);
+            i = endLine - 1;
+          } else {
+            result += '//' + code.substring(i + 2);
+            i = code.length;
+          }
+          continue;
+        }
+        
+        // Handle line breaks
+        if (char === '\n') {
+          result += '\n' + '  '.repeat(indentLevel);
+          continue;
+        }
+        
+        // Handle opening brackets
+        if (char === '{' || char === '[') {
+          result += char;
+          if (nextChar !== '\n') {
+            result += '\n' + '  '.repeat(++indentLevel);
+          } else {
+            indentLevel++;
+          }
+          continue;
+        }
+        
+        // Handle closing brackets
+        if (char === '}' || char === ']') {
+          if (prevChar !== '\n') {
+            result += '\n' + '  '.repeat(--indentLevel);
+          } else {
+            indentLevel--;
+          }
+          result += char;
+          if (nextChar !== ';' && nextChar !== ',' && nextChar !== ')') {
+            result += '\n' + '  '.repeat(indentLevel);
+          }
+          continue;
+        }
+        
+        // Handle semicolons
+        if (char === ';') {
+          result += char;
+          if (nextChar !== '\n' && nextChar !== '}') {
+            result += '\n' + '  '.repeat(indentLevel);
+          }
+          continue;
+        }
+        
+        // Add all other characters
+        result += char;
+      }
+      
+      return result;
+    } catch (error) {
+      // Fallback to basic formatting if advanced formatting fails
+      return formatBasic(code);
+    }
+  };
+  
+  // Basic code formatting as fallback
+  const formatBasic = (code: string) => {
     let result = '';
     let indentLevel = 0;
-    const lines = code.split(/[\r\n]+/);
     
-    for (let line of lines) {
+    code.split(/[\r\n]+/).forEach(line => {
       line = line.trim();
-      if (!line) continue;
+      if (!line) return;
       
       // Decrease indent for closing braces/brackets
       if (line.match(/^[}\])]/) || line.startsWith('case ') || line === 'default:') {
@@ -171,7 +292,7 @@ export function CodeBeautifier() {
       } else if (line.endsWith('}') || line.endsWith(']') || line.endsWith(')')) {
         indentLevel = Math.max(0, indentLevel - 1);
       }
-    }
+    });
     
     return result;
   };

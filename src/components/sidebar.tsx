@@ -113,7 +113,7 @@ export function Sidebar() {
           )}
         </Button>
       </div>
-      <div className="flex-1 py-4">
+      <div className="flex-1 py-4 overflow-y-auto scrollbar-hide">
         <nav className="space-y-1 px-2">
           {sidebarItems.map((item) => {
             const isActive = location.pathname === item.path;
