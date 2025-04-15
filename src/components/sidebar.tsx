@@ -12,6 +12,8 @@ import {
   Settings,
   ChevronRight,
   ChevronLeft,
+  Palette,
+  PaintBucket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -58,6 +60,21 @@ const sidebarItems: SidebarItem[] = [
     name: "Converter",
     icon: RefreshCw,
     path: "/converter",
+  },
+  {
+    name: "Color Converter",
+    icon: PaintBucket,
+    path: "/color",
+  },
+  {
+    name: "Color Palette",
+    icon: Palette,
+    path: "/palette",
+  },
+  {
+    name: "Code Beautifier",
+    icon: Braces,
+    path: "/beautify",
   },
   {
     name: "Settings",
