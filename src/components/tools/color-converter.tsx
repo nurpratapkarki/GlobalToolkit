@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { ToolLayout } from "@/components/tool-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Copy, RefreshCw, Check, Palette, Droplet, SlidersHorizontal, Grid3X3, Swatch, ColorPicker } from "lucide-react";
+import { Copy, RefreshCw, Check, Palette, Droplet, SlidersHorizontal, Grid3X3, PaintBucket, Pipette } from "lucide-react";
 import tinycolor from "tinycolor2";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -182,7 +183,7 @@ export function ColorConverter() {
         <Tabs defaultValue="picker" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-4 mb-4 bg-secondary/50">
             <TabsTrigger value="picker" className="flex items-center gap-2">
-              <ColorPicker className="h-4 w-4" /> Color Picker
+              <Pipette className="h-4 w-4" /> Color Picker
             </TabsTrigger>
             <TabsTrigger value="schemes" className="flex items-center gap-2">
               <Grid3X3 className="h-4 w-4" /> Color Schemes
@@ -232,7 +233,7 @@ export function ColorConverter() {
               <Card className="shadow-lg border-none">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Swatch className="h-5 w-5 text-primary" /> Color Controls
+                    <PaintBucket className="h-5 w-5 text-primary" /> Color Controls
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
