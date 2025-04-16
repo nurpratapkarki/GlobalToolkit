@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +19,7 @@ import { Converter } from "./components/tools/converter";
 import { ColorConverter } from "./components/tools/color-converter";
 import { ColorPalette } from "./components/tools/color-palette";
 import { CodeBeautifier } from "./components/tools/code-beautifier";
+import { Settings } from "./components/tools/settings";
 
 const App = () => {
   const queryClient = new QueryClient();

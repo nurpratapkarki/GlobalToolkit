@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ToolLayout } from "../tool-layout";
 import { useTheme } from "@/components/theme-provider";
@@ -138,9 +139,10 @@ export function Settings() {
                       step={1}
                       defaultValue={[settings.display.fontSize]}
                       value={[settings.display.fontSize]}
-                      onValueChange={(value) => 
-                        updateSettings("display", "fontSize", value[0])
-                      }
+                      onValueChange={(value) => {
+                        updateSettings("display", "fontSize", value[0]);
+                        setIsDirty(true);
+                      }}
                       className="flex-1"
                     />
                     <span className="text-xs">20px</span>
@@ -182,9 +184,10 @@ export function Settings() {
                     <Switch 
                       id="flag-global"
                       checked={settings.regexFlags.global}
-                      onCheckedChange={(checked) => 
-                        updateSettings("regexFlags", "global", checked)
-                      }
+                      onCheckedChange={(checked) => {
+                        updateSettings("regexFlags", "global", checked);
+                        setIsDirty(true);
+                      }}
                     />
                     <Label htmlFor="flag-global">Global (g)</Label>
                   </div>
@@ -192,9 +195,10 @@ export function Settings() {
                     <Switch 
                       id="flag-case"
                       checked={settings.regexFlags.caseInsensitive}
-                      onCheckedChange={(checked) => 
-                        updateSettings("regexFlags", "caseInsensitive", checked)
-                      }
+                      onCheckedChange={(checked) => {
+                        updateSettings("regexFlags", "caseInsensitive", checked);
+                        setIsDirty(true);
+                      }}
                     />
                     <Label htmlFor="flag-case">Case Insensitive (i)</Label>
                   </div>
@@ -202,9 +206,10 @@ export function Settings() {
                     <Switch 
                       id="flag-multiline"
                       checked={settings.regexFlags.multiline}
-                      onCheckedChange={(checked) => 
-                        updateSettings("regexFlags", "multiline", checked)
-                      }
+                      onCheckedChange={(checked) => {
+                        updateSettings("regexFlags", "multiline", checked);
+                        setIsDirty(true);
+                      }}
                     />
                     <Label htmlFor="flag-multiline">Multiline (m)</Label>
                   </div>
@@ -212,9 +217,10 @@ export function Settings() {
                     <Switch 
                       id="flag-singleline"
                       checked={settings.regexFlags.singleLine}
-                      onCheckedChange={(checked) => 
-                        updateSettings("regexFlags", "singleLine", checked)
-                      }
+                      onCheckedChange={(checked) => {
+                        updateSettings("regexFlags", "singleLine", checked);
+                        setIsDirty(true);
+                      }}
                     />
                     <Label htmlFor="flag-singleline">Single Line (s)</Label>
                   </div>
@@ -222,9 +228,10 @@ export function Settings() {
                     <Switch 
                       id="flag-unicode"
                       checked={settings.regexFlags.unicode}
-                      onCheckedChange={(checked) => 
-                        updateSettings("regexFlags", "unicode", checked)
-                      }
+                      onCheckedChange={(checked) => {
+                        updateSettings("regexFlags", "unicode", checked);
+                        setIsDirty(true);
+                      }}
                     />
                     <Label htmlFor="flag-unicode">Unicode (u)</Label>
                   </div>
@@ -232,9 +239,10 @@ export function Settings() {
                     <Switch 
                       id="flag-sticky"
                       checked={settings.regexFlags.sticky}
-                      onCheckedChange={(checked) => 
-                        updateSettings("regexFlags", "sticky", checked)
-                      }
+                      onCheckedChange={(checked) => {
+                        updateSettings("regexFlags", "sticky", checked);
+                        setIsDirty(true);
+                      }}
                     />
                     <Label htmlFor="flag-sticky">Sticky (y)</Label>
                   </div>
@@ -259,6 +267,7 @@ export function Settings() {
                         const value = parseInt(e.target.value);
                         if (value > 0) {
                           updateSettings("jwtSettings", "defaultExpiration", value);
+                          setIsDirty(true);
                         }
                       }}
                       className="w-20"
@@ -271,9 +280,10 @@ export function Settings() {
                   <Label htmlFor="jwt-algorithm">Default Algorithm</Label>
                   <Select
                     value={settings.jwtSettings.algorithm}
-                    onValueChange={(value) => 
-                      updateSettings("jwtSettings", "algorithm", value)
-                    }
+                    onValueChange={(value) => {
+                      updateSettings("jwtSettings", "algorithm", value);
+                      setIsDirty(true);
+                    }}
                   >
                     <SelectTrigger className="w-full md:w-[180px]">
                       <SelectValue placeholder="Select algorithm" />
@@ -298,9 +308,10 @@ export function Settings() {
                   <Switch 
                     id="md-live-preview"
                     checked={settings.markdownSettings.livePreview}
-                    onCheckedChange={(checked) => 
-                      updateSettings("markdownSettings", "livePreview", checked)
-                    }
+                    onCheckedChange={(checked) => {
+                      updateSettings("markdownSettings", "livePreview", checked);
+                      setIsDirty(true);
+                    }}
                   />
                   <Label htmlFor="md-live-preview">Live Preview</Label>
                 </div>
@@ -309,9 +320,10 @@ export function Settings() {
                   <Label htmlFor="md-default-view">Default View</Label>
                   <Select
                     value={settings.markdownSettings.defaultView}
-                    onValueChange={(value) => 
-                      updateSettings("markdownSettings", "defaultView", value as "split" | "edit" | "preview")
-                    }
+                    onValueChange={(value) => {
+                      updateSettings("markdownSettings", "defaultView", value as "split" | "edit" | "preview");
+                      setIsDirty(true);
+                    }}
                   >
                     <SelectTrigger className="w-full md:w-[180px]">
                       <SelectValue placeholder="Select view" />
@@ -335,9 +347,10 @@ export function Settings() {
                   <Switch 
                     id="base64-linebreaks"
                     checked={settings.base64Settings.lineBreaks}
-                    onCheckedChange={(checked) => 
-                      updateSettings("base64Settings", "lineBreaks", checked)
-                    }
+                    onCheckedChange={(checked) => {
+                      updateSettings("base64Settings", "lineBreaks", checked);
+                      setIsDirty(true);
+                    }}
                   />
                   <Label htmlFor="base64-linebreaks">Add Line Breaks</Label>
                 </div>
@@ -346,9 +359,10 @@ export function Settings() {
                   <Switch 
                     id="base64-urlsafe"
                     checked={settings.base64Settings.urlSafe}
-                    onCheckedChange={(checked) => 
-                      updateSettings("base64Settings", "urlSafe", checked)
-                    }
+                    onCheckedChange={(checked) => {
+                      updateSettings("base64Settings", "urlSafe", checked);
+                      setIsDirty(true);
+                    }}
                   />
                   <Label htmlFor="base64-urlsafe">URL Safe Encoding</Label>
                 </div>
@@ -359,9 +373,10 @@ export function Settings() {
                   <Label htmlFor="converter-input">Default Input Format</Label>
                   <Select
                     value={settings.converterSettings.defaultInputFormat}
-                    onValueChange={(value) => 
-                      updateSettings("converterSettings", "defaultInputFormat", value)
-                    }
+                    onValueChange={(value) => {
+                      updateSettings("converterSettings", "defaultInputFormat", value);
+                      setIsDirty(true);
+                    }}
                   >
                     <SelectTrigger className="w-full md:w-[180px]">
                       <SelectValue placeholder="Select format" />
@@ -380,9 +395,10 @@ export function Settings() {
                   <Label htmlFor="converter-output">Default Output Format</Label>
                   <Select
                     value={settings.converterSettings.defaultOutputFormat}
-                    onValueChange={(value) => 
-                      updateSettings("converterSettings", "defaultOutputFormat", value)
-                    }
+                    onValueChange={(value) => {
+                      updateSettings("converterSettings", "defaultOutputFormat", value);
+                      setIsDirty(true);
+                    }}
                   >
                     <SelectTrigger className="w-full md:w-[180px]">
                       <SelectValue placeholder="Select format" />
@@ -401,9 +417,10 @@ export function Settings() {
                   <Switch 
                     id="converter-pretty"
                     checked={settings.converterSettings.prettyPrint}
-                    onCheckedChange={(checked) => 
-                      updateSettings("converterSettings", "prettyPrint", checked)
-                    }
+                    onCheckedChange={(checked) => {
+                      updateSettings("converterSettings", "prettyPrint", checked);
+                      setIsDirty(true);
+                    }}
                   />
                   <Label htmlFor="converter-pretty">Pretty Print by Default</Label>
                 </div>
