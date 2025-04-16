@@ -1,7 +1,7 @@
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ToolLayout } from "../tool-layout";
 import { useTheme } from "@/components/theme-provider";
+import { useSettings } from "@/contexts/settings-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -15,117 +15,25 @@ import { Moon, Sun, SunMoon, RefreshCw, Check, Settings as SettingsIcon } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 
-interface UserSettings {
-  regexFlags: {
-    global: boolean;
-    caseInsensitive: boolean;
-    multiline: boolean;
-    singleLine: boolean;
-    unicode: boolean;
-    sticky: boolean;
-  };
-  jwtSettings: {
-    defaultExpiration: number; // in hours
-    algorithm: string;
-  };
-  markdownSettings: {
-    livePreview: boolean;
-    defaultView: "split" | "edit" | "preview";
-  };
-  base64Settings: {
-    lineBreaks: boolean;
-    urlSafe: boolean;
-  };
-  converterSettings: {
-    defaultInputFormat: string;
-    defaultOutputFormat: string;
-    prettyPrint: boolean;
-  };
-  display: {
-    fontSize: number; // in pixels
-  };
-}
-
-const defaultSettings: UserSettings = {
-  regexFlags: {
-    global: true,
-    caseInsensitive: false,
-    multiline: false,
-    singleLine: false,
-    unicode: false,
-    sticky: false,
-  },
-  jwtSettings: {
-    defaultExpiration: 24,
-    algorithm: "HS256",
-  },
-  markdownSettings: {
-    livePreview: true,
-    defaultView: "split",
-  },
-  base64Settings: {
-    lineBreaks: false,
-    urlSafe: false,
-  },
-  converterSettings: {
-    defaultInputFormat: "json",
-    defaultOutputFormat: "yaml",
-    prettyPrint: true,
-  },
-  display: {
-    fontSize: 14,
-  },
-};
-
 export function Settings() {
   const { theme, setTheme } = useTheme();
+  const { settings, updateSettings, resetSettings } = useSettings();
   const { toast } = useToast();
-  const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [isDirty, setIsDirty] = useState(false);
 
-  // Load settings from localStorage on component mount
-  useEffect(() => {
-    const savedSettings = localStorage.getItem("devtoolbox-settings");
-    if (savedSettings) {
-      try {
-        const parsedSettings = JSON.parse(savedSettings);
-        setSettings(parsedSettings);
-      } catch (error) {
-        console.error("Error parsing saved settings:", error);
-      }
-    }
-  }, []);
-
-  // Update settings handler
-  const updateSettings = <K extends keyof UserSettings, S extends keyof UserSettings[K]>(
-    category: K,
-    setting: S,
-    value: UserSettings[K][S]
-  ) => {
-    setSettings((prev) => ({
-      ...prev,
-      [category]: {
-        ...prev[category],
-        [setting]: value,
-      },
-    }));
-    setIsDirty(true);
-  };
-
-  // Save settings to localStorage
+  // Save settings handler
   const saveSettings = () => {
-    localStorage.setItem("devtoolbox-settings", JSON.stringify(settings));
     setIsDirty(false);
     toast({
       title: "Settings Saved",
-      description: "Your preferences have been saved",
+      description: "Your preferences have been saved and applied globally",
     });
   };
 
-  // Reset to default settings
-  const resetSettings = () => {
-    setSettings(defaultSettings);
-    setIsDirty(true);
+  // Handle settings reset
+  const handleResetSettings = () => {
+    resetSettings();
+    setIsDirty(false);
     toast({
       title: "Settings Reset",
       description: "Settings have been reset to defaults",
@@ -136,7 +44,7 @@ export function Settings() {
   const clearAllData = () => {
     if (window.confirm("Are you sure you want to clear all saved data? This cannot be undone.")) {
       localStorage.clear();
-      setSettings(defaultSettings);
+      resetSettings();
       setIsDirty(false);
       toast({
         title: "Data Cleared",
@@ -154,7 +62,7 @@ export function Settings() {
           <Button
             variant="outline"
             size="sm"
-            onClick={resetSettings}
+            onClick={handleResetSettings}
             className="flex items-center gap-1"
           >
             <RefreshCw className="h-4 w-4" />

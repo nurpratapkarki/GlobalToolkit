@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
-import { Trash2 } from "lucide-react";
+import { Trash2, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
@@ -13,6 +13,15 @@ export function Header() {
     toast({
       title: "New Session",
       description: "Current session has been cleared",
+    });
+  };
+
+  const handleDonate = () => {
+    // You can replace this URL with your actual donation link
+    window.open('https://github.com/sponsors', '_blank');
+    toast({
+      title: "Thank you!",
+      description: "Your support helps keep this project alive ❤️",
     });
   };
 
@@ -37,8 +46,14 @@ export function Header() {
         
         <ThemeToggle />
         
-        <Button variant="default" size="sm">
-          Login
+        <Button 
+          variant="default" 
+          size="sm"
+          onClick={handleDonate}
+          className="flex items-center gap-1"
+        >
+          <Heart className="h-4 w-4" />
+          <span className="hidden sm:inline">Donate</span>
         </Button>
       </div>
     </header>
