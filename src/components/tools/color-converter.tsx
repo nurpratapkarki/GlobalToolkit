@@ -3,7 +3,7 @@ import { ToolLayout } from "@/components/tool-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Copy, RefreshCw, Check, Palette, Droplet, SlidersHorizontal, Grid3X3 } from "lucide-react";
+import { Copy, RefreshCw, Check, Palette, Droplet, SlidersHorizontal, Grid3X3, Swatch, ColorPicker } from "lucide-react";
 import tinycolor from "tinycolor2";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,14 +33,12 @@ export function ColorConverter() {
   const [activeTab, setActiveTab] = useState('picker');
   const [selectedScheme, setSelectedScheme] = useState('analogous');
 
-  // Derived values
   const hex = colorObj.toHexString();
   const rgb = colorObj.toRgb();
   const hsl = colorObj.toHsl();
   const formattedRgb = colorUtils.formatRgb(rgb);
   const formattedHsl = colorUtils.formatHsl(hsl);
 
-  // Update draft values when color changes
   useEffect(() => {
     if (editing !== 'hex') setDraft(v => ({ ...v, hex }));
     if (editing !== 'rgb') setDraft(v => ({
@@ -102,7 +100,6 @@ export function ColorConverter() {
     setColorObj(newColor);
   };
 
-  // Common handlers
   const copyToClipboard = (text, label) => {
     navigator.clipboard.writeText(text);
     setCopied(label);
@@ -117,7 +114,6 @@ export function ColorConverter() {
     toast({ title: "Random Color", description: `Generated: ${newColor.toHexString()}` });
   };
 
-  // Color schemes and variations
   const generateColorScheme = () => {
     switch (selectedScheme) {
       case 'analogous':
@@ -139,7 +135,6 @@ export function ColorConverter() {
 
   const colorScheme = generateColorScheme();
   
-  // Generate shades and tints
   const generateVariations = () => {
     const darken = [];
     const lighten = [];
@@ -158,7 +153,6 @@ export function ColorConverter() {
   
   const variations = generateVariations();
 
-  // Generate accessibility info
   const getBrightness = tinycolor(hex).getBrightness();
   const isDark = tinycolor(hex).isDark();
   const contrastWithWhite = tinycolor.readability(hex, "#ffffff").toFixed(2);
@@ -167,150 +161,171 @@ export function ColorConverter() {
   const isAccessibleOnBlack = tinycolor.isReadable(hex, "#000000");
 
   return (
-    <ToolLayout title="Color Converter" description="Convert between color formats and generate color schemes">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <Tabs defaultValue="picker" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-4">
-            <TabsTrigger value="picker"><Palette className="mr-2 h-4 w-4" /> Color Picker</TabsTrigger>
-            <TabsTrigger value="schemes"><Grid3X3 className="mr-2 h-4 w-4" /> Color Schemes</TabsTrigger>
-            <TabsTrigger value="variations"><Droplet className="mr-2 h-4 w-4" /> Variations</TabsTrigger>
-            <TabsTrigger value="accessibility"><SlidersHorizontal className="mr-2 h-4 w-4" /> Accessibility</TabsTrigger>
+    <ToolLayout 
+      title="Color Converter" 
+      description="Convert, explore, and analyze colors with ease"
+      actionButtons={
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-2"
+            onClick={generateRandomColor}
+          >
+            <RefreshCw className="h-4 w-4" />
+            Random Color
+          </Button>
+        </div>
+      }
+    >
+      <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
+        <Tabs defaultValue="picker" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-4 mb-4 bg-secondary/50">
+            <TabsTrigger value="picker" className="flex items-center gap-2">
+              <ColorPicker className="h-4 w-4" /> Color Picker
+            </TabsTrigger>
+            <TabsTrigger value="schemes" className="flex items-center gap-2">
+              <Grid3X3 className="h-4 w-4" /> Color Schemes
+            </TabsTrigger>
+            <TabsTrigger value="variations" className="flex items-center gap-2">
+              <Droplet className="h-4 w-4" /> Variations
+            </TabsTrigger>
+            <TabsTrigger value="accessibility" className="flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4" /> Accessibility
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="picker">
             <div className="grid md:grid-cols-2 gap-8">
-              {/* Color Preview */}
-              <Card>
+              <Card className="shadow-lg border-none">
                 <CardHeader>
-                  <CardTitle>Preview</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Palette className="h-5 w-5 text-primary" /> Color Preview
+                  </CardTitle>
                 </CardHeader>
-                <div style={{ backgroundColor: colorObj.toRgbString() }} className="h-40" />
-                <CardContent className="p-4 space-y-2 grid grid-cols-2 gap-2">
-                  <Button 
-                    onClick={() => copyToClipboard(hex, 'hex')} 
-                    variant="outline" 
-                    className="w-full"
-                  >
-                    {copied === 'hex' ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />} 
-                    Copy HEX
-                  </Button>
-                  <Button 
-                    onClick={() => copyToClipboard(formattedRgb, 'rgb')} 
-                    variant="outline" 
-                    className="w-full"
-                  >
-                    {copied === 'rgb' ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />} 
-                    Copy RGB
-                  </Button>
-                  <Button 
-                    onClick={() => copyToClipboard(formattedHsl, 'hsl')} 
-                    variant="outline" 
-                    className="w-full"
-                  >
-                    {copied === 'hsl' ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />} 
-                    Copy HSL
-                  </Button>
-                  <Button 
-                    onClick={generateRandomColor} 
-                    variant="outline" 
-                    className="w-full"
-                  >
-                    <RefreshCw className="mr-2 h-4 w-4" /> Random
-                  </Button>
+                <div 
+                  style={{ 
+                    backgroundColor: colorObj.toRgbString(),
+                    boxShadow: `0 10px 25px -5px ${colorObj.setAlpha(0.3).toRgbString()}`
+                  }} 
+                  className="h-48 w-full rounded-b-lg transition-all duration-300 ease-in-out hover:scale-[1.01]" 
+                />
+                <CardContent className="p-4 grid grid-cols-2 gap-2">
+                  {[
+                    { label: 'HEX', value: hex, key: 'hex' },
+                    { label: 'RGB', value: formattedRgb, key: 'rgb' },
+                    { label: 'HSL', value: formattedHsl, key: 'hsl' }
+                  ].map((format) => (
+                    <Button 
+                      key={format.key}
+                      onClick={() => copyToClipboard(format.value, format.key)} 
+                      variant="outline" 
+                      className="w-full flex justify-between"
+                    >
+                      {format.label}
+                      {copied === format.key ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  ))}
                 </CardContent>
               </Card>
 
-              {/* Input Controls */}
-              <Card className="p-4 space-y-4">
-                <div className="space-y-2">
-                  <Label>HEX</Label>
-                  <Input
-                    value={draft.hex}
-                    onChange={(e) => handleHexChange(e.target.value)}
-                    onFocus={() => setEditing('hex')}
-                    onBlur={() => setEditing(null)}
-                  />
-                </div>
+              <Card className="shadow-lg border-none">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Swatch className="h-5 w-5 text-primary" /> Color Controls
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>HEX</Label>
+                    <Input
+                      value={draft.hex}
+                      onChange={(e) => handleHexChange(e.target.value)}
+                      onFocus={() => setEditing('hex')}
+                      onBlur={() => setEditing(null)}
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label>RGB</Label>
+                  <div className="space-y-2">
+                    <Label>RGB</Label>
+                    <div className="flex gap-2">
+                      {['r', 'g', 'b'].map((c) => (
+                        <div key={c} className="w-full">
+                          <Label className="text-xs">{c.toUpperCase()}</Label>
+                          <Input
+                            value={Math.round(draft.rgb[c] || 0)}
+                            onChange={(e) => handleRgbChange(c, e.target.value)}
+                            onFocus={() => setEditing('rgb')}
+                            onBlur={() => setEditing(null)}
+                            type="number"
+                            min="0"
+                            max="255"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>HSL</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { key: 'h', label: 'Hue', max: 360 },
+                        { key: 's', label: 'Saturation', max: 100 },
+                        { key: 'l', label: 'Lightness', max: 100 }
+                      ].map((item) => (
+                        <div key={item.key} className="w-full">
+                          <Label className="text-xs">{item.label}</Label>
+                          <Input
+                            value={Math.round(draft.hsl[item.key] || 0)}
+                            onChange={(e) => handleHslChange(item.key, e.target.value)}
+                            onFocus={() => setEditing('hsl')}
+                            onBlur={() => setEditing(null)}
+                            type="number"
+                            min="0"
+                            max={item.max}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="flex justify-between">
+                      <span>Alpha: {draft.alpha.toFixed(2)}</span>
+                      <span>{Math.round(draft.alpha * 100)}%</span>
+                    </Label>
+                    <Input 
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={draft.alpha}
+                      onChange={(e) => handleAlphaChange(e.target.value)}
+                      onFocus={() => setEditing('alpha')}
+                      onBlur={() => setEditing(null)}
+                    />
+                  </div>
+
                   <div className="flex gap-2">
-                    {['r', 'g', 'b'].map((c) => (
-                      <div key={c} className="w-full">
-                        <Label className="text-xs">{c.toUpperCase()}</Label>
-                        <Input
-                          value={Math.round(draft.rgb[c] || 0)}
-                          onChange={(e) => handleRgbChange(c, e.target.value)}
-                          onFocus={() => setEditing('rgb')}
-                          onBlur={() => setEditing(null)}
-                          type="number"
-                          min="0"
-                          max="255"
+                    <Input
+                      type="color"
+                      value={hex}
+                      onChange={(e) => setColorObj(tinycolor(e.target.value).setAlpha(draft.alpha))}
+                      className="h-12"
+                    />
+                    <div className="grid grid-cols-4 gap-2 w-full">
+                      {["#f44336", "#2196f3", "#4caf50", "#ffeb3b"].map((color) => (
+                        <Button
+                          key={color}
+                          style={{ backgroundColor: color }}
+                          className="w-full h-12"
+                          onClick={() => setColorObj(tinycolor(color).setAlpha(draft.alpha))}
                         />
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>HSL</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { key: 'h', label: 'Hue', max: 360 },
-                      { key: 's', label: 'Saturation', max: 100 },
-                      { key: 'l', label: 'Lightness', max: 100 }
-                    ].map((item) => (
-                      <div key={item.key} className="w-full">
-                        <Label className="text-xs">{item.label}</Label>
-                        <Input
-                          value={Math.round(draft.hsl[item.key] || 0)}
-                          onChange={(e) => handleHslChange(item.key, e.target.value)}
-                          onFocus={() => setEditing('hsl')}
-                          onBlur={() => setEditing(null)}
-                          type="number"
-                          min="0"
-                          max={item.max}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="flex justify-between">
-                    <span>Alpha: {draft.alpha.toFixed(2)}</span>
-                    <span>{Math.round(draft.alpha * 100)}%</span>
-                  </Label>
-                  <Input 
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={draft.alpha}
-                    onChange={(e) => handleAlphaChange(e.target.value)}
-                    onFocus={() => setEditing('alpha')}
-                    onBlur={() => setEditing(null)}
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Input
-                    type="color"
-                    value={hex}
-                    onChange={(e) => setColorObj(tinycolor(e.target.value).setAlpha(draft.alpha))}
-                    className="h-12"
-                  />
-                  <div className="grid grid-cols-4 gap-2 w-full">
-                    {["#f44336", "#2196f3", "#4caf50", "#ffeb3b"].map((color) => (
-                      <Button
-                        key={color}
-                        style={{ backgroundColor: color }}
-                        className="w-full h-12"
-                        onClick={() => setColorObj(tinycolor(color).setAlpha(draft.alpha))}
-                      />
-                    ))}
-                  </div>
-                </div>
+                </CardContent>
               </Card>
             </div>
           </TabsContent>
