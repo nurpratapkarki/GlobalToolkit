@@ -10,6 +10,7 @@ import {
   FileText,
   KeyRound,
   Settings,
+  Home,
   ChevronRight,
   ChevronLeft,
   Palette,
@@ -26,6 +27,11 @@ type SidebarItem = {
 };
 
 const sidebarItems: SidebarItem[] = [
+  {
+    name: "Home",
+    icon: Home,
+    path: "/",
+  },
   {
     name: "JSON",
     icon: FileJson,
@@ -67,7 +73,7 @@ const sidebarItems: SidebarItem[] = [
     path: "/color",
   },
   {
-    name: "Color Palette",
+    name: "Gradient Generator",
     icon: Palette,
     path: "/palette",
   },
