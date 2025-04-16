@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { ToolLayout } from "@/components/tool-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Copy, Check, RefreshCw, Palette, Monitor } from "lucide-react";
+import { Copy, Check, RefreshCw, Palette, Monitor, Plus } from "lucide-react";
 import tinycolor from "tinycolor2";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -89,6 +88,9 @@ export function ColorPalette() {
   const { toast } = useToast();
   const [selectedGradient, setSelectedGradient] = useState<string>(websitePresets[websiteType].gradients[0]);
   const [selectedCombination, setSelectedCombination] = useState<string[]>(websitePresets[websiteType].combinations[0]);
+  const [customColors, setCustomColors] = useState<string[]>(['#0ea5e9', '#2563eb', '#475569']);
+  const [generatedCombinations, setGeneratedCombinations] = useState<string[][]>([]);
+  const [showMore, setShowMore] = useState(false);
 
   const copyToClipboard = (text: string, index: number) => {
     navigator.clipboard.writeText(text);
@@ -105,6 +107,41 @@ export function ColorPalette() {
     setWebsiteType(value);
     setSelectedGradient(websitePresets[value].gradients[0]);
     setSelectedCombination(websitePresets[value].combinations[0]);
+  };
+
+  const generateColorCombinations = (baseColors: string[]) => {
+    const combinations: string[][] = [];
+    const color = tinycolor(baseColors[0]);
+    
+    combinations.push(
+      color.analogous().map(c => c.toHexString())
+    );
+    
+    combinations.push(
+      color.triad().map(c => c.toHexString())
+    );
+    
+    combinations.push(
+      color.splitcomplement().map(c => c.toHexString())
+    );
+
+    combinations.push(
+      color.monochromatic().slice(0, 3).map(c => c.toHexString())
+    );
+
+    setGeneratedCombinations(combinations);
+  };
+
+  const handleColorChange = (index: number, value: string) => {
+    const newColors = [...customColors];
+    newColors[index] = value;
+    setCustomColors(newColors);
+    generateColorCombinations(newColors);
+  };
+
+  const handleGenerateMore = () => {
+    setShowMore(true);
+    generateColorCombinations(customColors);
   };
 
   return (
@@ -232,6 +269,97 @@ export function ColorPalette() {
             </div>
           )}
         </div>
+
+        <Card className="mt-8">
+          <CardContent className="p-6">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <Label className="text-lg">Custom Color Generator</Label>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => generateColorCombinations(customColors)}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Generate
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                {customColors.map((color, index) => (
+                  <div key={index} className="space-y-2">
+                    <Input
+                      type="color"
+                      value={color}
+                      onChange={(e) => handleColorChange(index, e.target.value)}
+                      className="h-12 w-full cursor-pointer"
+                    />
+                    <Input
+                      type="text"
+                      value={color}
+                      onChange={(e) => handleColorChange(index, e.target.value)}
+                      className="font-mono text-sm"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {generatedCombinations.length > 0 && (
+                <div className="space-y-4">
+                  <Label className="text-lg">Generated Combinations</Label>
+                  <div className="grid gap-4">
+                    {generatedCombinations.map((combination, index) => (
+                      <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="grid grid-cols-3 gap-4 mb-4">
+                            {combination.map((color, colorIndex) => (
+                              <div
+                                key={colorIndex}
+                                className="aspect-square rounded-lg shadow-sm transition-transform hover:scale-105"
+                                style={{ backgroundColor: color }}
+                              />
+                            ))}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex gap-2">
+                              {combination.map((color, colorIndex) => (
+                                <code key={colorIndex} className="text-sm font-mono">
+                                  {color}
+                                </code>
+                              ))}
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(combination.join(", "), index + 100)}
+                            >
+                              {copiedIndex === index + 100 ? (
+                                <Check className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <Copy className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+
+                  {!showMore && (
+                    <Button 
+                      className="w-full mt-4" 
+                      variant="outline"
+                      onClick={handleGenerateMore}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Load More Combinations
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </ToolLayout>
   );
