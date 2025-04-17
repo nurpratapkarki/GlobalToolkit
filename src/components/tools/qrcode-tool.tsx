@@ -8,6 +8,11 @@ import { QRCodeScanner } from "./qrcode/scanner";
 export function QRCodeTool() {
   const [activeTab, setActiveTab] = useState<string>("generator");
 
+  const handleTabChange = (value: string) => {
+    // Make sure any active scanner is stopped when switching tabs
+    setActiveTab(value);
+  };
+
   return (
     <ToolLayout
       title="QR Code Tool"
@@ -17,7 +22,8 @@ export function QRCodeTool() {
         <Tabs
           defaultValue="generator"
           className="w-full"
-          onValueChange={(value) => setActiveTab(value)}
+          onValueChange={handleTabChange}
+          value={activeTab}
         >
           <TabsList className="grid grid-cols-2 mb-6">
             <TabsTrigger value="generator">Generator</TabsTrigger>

@@ -86,12 +86,25 @@ export function QRCodeScanner() {
   };
 
   const handleScanSuccess = async (decodedText: string) => {
-    await stopScanner();
-    setScanResult(decodedText);
-    toast({
-      title: "QR Code Detected",
-      description: "Successfully scanned a QR code",
-    });
+    if (scannerRef.current && scannerRef.current.isScanning) {
+      try {
+        await scannerRef.current.stop();
+        setScanActive(false);
+        setScanResult(decodedText);
+        toast({
+          title: "QR Code Detected",
+          description: "Successfully scanned a QR code",
+        });
+      } catch (error) {
+        console.error("Error stopping scanner after successful scan:", error);
+      }
+    } else {
+      setScanResult(decodedText);
+      toast({
+        title: "QR Code Detected",
+        description: "Successfully scanned a QR code",
+      });
+    }
   };
 
   const handleRestart = () => {
@@ -139,10 +152,17 @@ export function QRCodeScanner() {
       }
     };
     reader.readAsDataURL(file);
+    
+    // Reset the input value to allow uploading the same file again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const triggerFileUpload = () => {
-    fileInputRef.current?.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   const openURL = (url: string) => {
