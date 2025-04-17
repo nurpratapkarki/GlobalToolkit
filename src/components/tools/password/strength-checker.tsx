@@ -336,20 +336,6 @@ export function PasswordStrengthChecker() {
           </div>
         </CardContent>
       </Card>
-
-      <Card className="bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
-            <div>
-              <h3 className="font-medium text-amber-800 dark:text-amber-300">Coming Soon: Password Breach Checker</h3>
-              <p className="text-sm text-amber-700 dark:text-amber-400">
-                We're working on integrating with the HaveIBeenPwned API to check if your password has appeared in known data breaches.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
