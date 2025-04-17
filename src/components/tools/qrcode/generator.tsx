@@ -43,13 +43,15 @@ export function QRCodeGenerator() {
     const canvas = qrRef.current.querySelector("canvas");
     if (!canvas) return;
     
+    // Create a temporary link element and trigger download without appending to DOM
     const url = canvas.toDataURL("image/png");
     const link = document.createElement("a");
     link.href = url;
     link.download = "qrcode.png";
-    document.body.appendChild(link);
+    
+    // Use modern approach to click the link without appending to the DOM
+    link.style.display = "none";
     link.click();
-    document.body.removeChild(link);
     
     toast({
       title: "QR Code Downloaded",
