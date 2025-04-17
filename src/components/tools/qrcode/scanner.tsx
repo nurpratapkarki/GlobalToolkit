@@ -26,23 +26,38 @@ export function QRCodeScanner() {
     }
   };
 
-  // Initialize scanner
+  // Initialize scanner on mount
   useEffect(() => {
-    if (scannerDivRef.current) {
+    if (scannerDivRef.current && !scannerRef.current) {
       scannerRef.current = new Html5Qrcode("qr-reader");
     }
 
+    // Cleanup on unmount
     return () => {
       if (scannerRef.current && scannerRef.current.isScanning) {
         scannerRef.current.stop().catch(error => {
-          console.error("Error stopping scanner:", error);
+          console.error("Error stopping scanner on unmount:", error);
+        });
+      }
+    };
+  }, []);
+
+  // Make sure the scanner is properly stopped when component unmounts or tab changes
+  useEffect(() => {
+    return () => {
+      if (scannerRef.current && scannerRef.current.isScanning) {
+        scannerRef.current.stop().catch(error => {
+          console.error("Error stopping scanner on cleanup:", error);
         });
       }
     };
   }, []);
 
   const startScanner = async () => {
-    if (!scannerRef.current) return;
+    if (!scannerRef.current || !scannerDivRef.current) {
+      console.error("Scanner refs not initialized");
+      return;
+    }
     
     try {
       setScanActive(true);

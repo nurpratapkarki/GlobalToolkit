@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ToolLayout } from "../tool-layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QRCodeGenerator } from "./qrcode/generator";
@@ -9,7 +9,8 @@ export function QRCodeTool() {
   const [activeTab, setActiveTab] = useState<string>("generator");
 
   const handleTabChange = (value: string) => {
-    // Make sure any active scanner is stopped when switching tabs
+    // When switching tabs, the previous tab's components will unmount
+    // and their cleanup effects will run
     setActiveTab(value);
   };
 
@@ -35,7 +36,7 @@ export function QRCodeTool() {
           </TabsContent>
           
           <TabsContent value="scanner" className="animate-fade-in">
-            <QRCodeScanner />
+            {activeTab === "scanner" && <QRCodeScanner />}
           </TabsContent>
         </Tabs>
       </div>
