@@ -1,6 +1,7 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { FileJson, Code2, Hash, FileText, RefreshCw, KeyRound, Settings, ArrowRightLeft, Palette, PaintBucket } from "lucide-react";
+import { FileJson, Code2, Hash, FileText, RefreshCw, KeyRound, Settings, ArrowRightLeft, Palette, PaintBucket, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ToolCardProps = {
@@ -80,11 +81,11 @@ const HomePage = () => {
       className: "border-indigo-200 dark:border-indigo-900",
     },
     {
-      title: "Settings",
-      description: "Configure application settings",
-      icon: Settings,
-      path: "/settings",
-      className: "border-gray-200 dark:border-gray-800",
+      title: "Password Tools",
+      description: "Check strength and hash passwords",
+      icon: Lock,
+      path: "/password",
+      className: "border-teal-200 dark:border-teal-900",
     },
     {
       title: "Color Converter",
@@ -106,6 +107,13 @@ const HomePage = () => {
       icon: Code2,
       path: "/beautify",
       className: "border-emerald-200 dark:border-emerald-900",
+    },
+    {
+      title: "Settings",
+      description: "Configure application settings",
+      icon: Settings,
+      path: "/settings",
+      className: "border-gray-200 dark:border-gray-800",
     },
   ];
 

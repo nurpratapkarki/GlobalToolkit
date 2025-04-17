@@ -20,6 +20,7 @@ import { ColorConverter } from "./components/tools/color-converter";
 import { ColorPalette } from "./components/tools/color-palette";
 import { CodeBeautifier } from "./components/tools/code-beautifier";
 import { Settings } from "./components/tools/settings";
+import { PasswordTool } from "./components/tools/password-tool";
 
 const App = () => {
   const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => {
                   <Route path="/color" element={<ColorConverter />} />
                   <Route path="/palette" element={<ColorPalette />} />
                   <Route path="/beautify" element={<CodeBeautifier />} />
+                  <Route path="/password" element={<PasswordTool />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>

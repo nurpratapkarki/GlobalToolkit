@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -15,6 +14,7 @@ import {
   ChevronLeft,
   Palette,
   PaintBucket,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -73,9 +73,14 @@ const sidebarItems: SidebarItem[] = [
     path: "/color",
   },
   {
-    name: "Gradient Generator",
+    name: "Color Palette",
     icon: Palette,
     path: "/palette",
+  },
+  {
+    name: "Password Tool",
+    icon: Lock,
+    path: "/password",
   },
   {
     name: "Code Beautifier",
