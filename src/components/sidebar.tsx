@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -15,6 +16,7 @@ import {
   Palette,
   PaintBucket,
   Lock,
+  QrCode,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -81,6 +83,11 @@ const sidebarItems: SidebarItem[] = [
     name: "Password Tool",
     icon: Lock,
     path: "/password",
+  },
+  {
+    name: "QR Code",
+    icon: QrCode,
+    path: "/qrcode",
   },
   {
     name: "Code Beautifier",

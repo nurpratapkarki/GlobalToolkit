@@ -21,6 +21,7 @@ import { ColorPalette } from "./components/tools/color-palette";
 import { CodeBeautifier } from "./components/tools/code-beautifier";
 import { Settings } from "./components/tools/settings";
 import { PasswordTool } from "./components/tools/password-tool";
+import { QRCodeTool } from "./components/tools/qrcode-tool";
 
 const App = () => {
   const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => {
                   <Route path="/palette" element={<ColorPalette />} />
                   <Route path="/beautify" element={<CodeBeautifier />} />
                   <Route path="/password" element={<PasswordTool />} />
+                  <Route path="/qrcode" element={<QRCodeTool />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>

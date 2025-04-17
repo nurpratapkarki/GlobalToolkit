@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { FileJson, Code2, Hash, FileText, RefreshCw, KeyRound, Settings, ArrowRightLeft, Palette, PaintBucket, Lock } from "lucide-react";
+import { FileJson, Code2, Hash, FileText, RefreshCw, KeyRound, Settings, ArrowRightLeft, Palette, PaintBucket, Lock, QrCode } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ToolCardProps = {
@@ -86,6 +86,13 @@ const HomePage = () => {
       icon: Lock,
       path: "/password",
       className: "border-teal-200 dark:border-teal-900",
+    },
+    {
+      title: "QR Code Tool",
+      description: "Generate and scan QR codes",
+      icon: QrCode,
+      path: "/qrcode",
+      className: "border-amber-200 dark:border-amber-900",
     },
     {
       title: "Color Converter",
