@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { AlertCircle, CheckCircle, Eye, EyeOff, Loader, ShieldAlert, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import crypto from 'crypto-js';
+import * as crypto from 'crypto-js';
 
 export function PasswordBreachChecker() {
   const [password, setPassword] = useState("");
