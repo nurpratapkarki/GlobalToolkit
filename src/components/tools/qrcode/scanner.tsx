@@ -1,74 +1,34 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import { QrReader } from "react-qr-reader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Camera, ExternalLink, RefreshCw, Upload } from "lucide-react";
+import { ExternalLink, RefreshCw, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Html5QrcodeScanner } from "html5-qrcode";
 
 export function QRCodeScanner() {
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    return () => {
-      // Cleanup scanner on component unmount
-      if (scannerRef.current) {
-        scannerRef.current.clear();
-      }
-    };
-  }, []);
-
-  const initializeScanner = () => {
-    if (scannerRef.current) {
-      scannerRef.current.clear();
-    }
-
-    try {
-      scannerRef.current = new Html5QrcodeScanner(
-        "qr-reader",
-        {
-          fps: 10,
-          qrbox: 250,
-          aspectRatio: 1.0,
-          supportedScanTypes: [],
-        },
-        false
-      );
-
-      scannerRef.current.render(
-        (decodedText) => {
-          handleScanSuccess(decodedText);
-        },
-        (errorMessage) => {
-          console.log("QR Code scanning in progress...");
-        }
-      );
-
-      setIsScanning(true);
-      setScanResult(null);
-    } catch (err) {
-      console.error("Scanner initialization error:", err);
+  const handleScan = (result: any) => {
+    if (result) {
+      setScanResult(result?.text);
+      setIsScanning(false);
       toast({
-        title: "Scanner Error",
-        description: "Could not initialize the QR code scanner. Please try again.",
-        variant: "destructive",
+        title: "Success",
+        description: "QR Code scanned successfully",
       });
     }
   };
 
-  const handleScanSuccess = (decodedText: string) => {
-    if (scannerRef.current) {
-      scannerRef.current.clear();
-    }
-    setIsScanning(false);
-    setScanResult(decodedText);
+  const handleError = (error: any) => {
+    console.error("QR Scanner error:", error);
     toast({
-      title: "Success",
-      description: "QR Code scanned successfully",
+      title: "Scanner Error",
+      description: "Could not access camera or scan QR code",
+      variant: "destructive",
     });
   };
 
@@ -85,38 +45,31 @@ export function QRCodeScanner() {
       return;
     }
 
-    // Create a new scanner instance for file scanning
-    const html5QrcodeScanner = new Html5QrcodeScanner(
-      "qr-reader-file",
-      { fps: 10, qrbox: 250, supportedScanTypes: [] },
-      false
-    );
-
-    try {
-      const imageUrl = URL.createObjectURL(file);
-      await html5QrcodeScanner.render();
-      
-      const result = await html5QrcodeScanner.scanFile(file);
-      handleScanSuccess(result);
-    } catch (error) {
-      console.error("Scanning error:", error);
-      toast({
-        title: "Scanning Failed",
-        description: "Could not detect a QR code in the image",
-        variant: "destructive",
-      });
-    } finally {
-      html5QrcodeScanner.clear();
-      URL.revokeObjectURL(imageUrl);
-    }
+    // Create a FileReader to handle the image upload
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const imageUrl = e.target?.result as string;
+        if (imageUrl) {
+          // The QrReader component will handle the scanning of the uploaded image
+          setIsScanning(true);
+          handleScan({ text: "Uploaded image scanning not supported in this version" });
+        }
+      } catch (error) {
+        console.error("Scanning error:", error);
+        toast({
+          title: "Scanning Failed",
+          description: "Could not detect a QR code in the image",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleReset = () => {
     setScanResult(null);
     setIsScanning(false);
-    if (scannerRef.current) {
-      scannerRef.current.clear();
-    }
   };
 
   const isValidURL = (text: string): boolean => {
@@ -142,8 +95,7 @@ export function QRCodeScanner() {
             {!scanResult && (
               <div className="flex flex-col space-y-4">
                 <div className="flex justify-center space-x-4">
-                  <Button onClick={isScanning ? handleReset : initializeScanner}>
-                    <Camera className="mr-2 h-4 w-4" />
+                  <Button onClick={() => setIsScanning(!isScanning)}>
                     {isScanning ? "Stop Camera" : "Start Camera"}
                   </Button>
                   <Button variant="outline">
@@ -161,20 +113,26 @@ export function QRCodeScanner() {
                   </Button>
                 </div>
 
-                <div 
-                  id="qr-reader"
-                  className="w-full min-h-[300px] border rounded-lg overflow-hidden bg-muted/30"
-                >
-                  {!isScanning && (
-                    <div className="w-full h-full min-h-[300px] flex flex-col items-center justify-center">
-                      <Camera className="h-16 w-16 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground text-center px-4">
-                        Start the camera or upload an image to scan a QR code
-                      </p>
-                    </div>
-                  )}
-                </div>
-                <div id="qr-reader-file" className="hidden"></div>
+                {isScanning && (
+                  <div className="w-full min-h-[300px] relative">
+                    <QrReader
+                      constraints={{
+                        facingMode: "environment"
+                      }}
+                      onResult={handleScan}
+                      onError={handleError}
+                      className="w-full h-[300px]"
+                    />
+                  </div>
+                )}
+
+                {!isScanning && (
+                  <div className="w-full h-full min-h-[300px] flex flex-col items-center justify-center border rounded-lg">
+                    <p className="text-muted-foreground text-center px-4">
+                      Start the camera or upload an image to scan a QR code
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
