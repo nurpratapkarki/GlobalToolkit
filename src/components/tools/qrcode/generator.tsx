@@ -43,18 +43,37 @@ export function QRCodeGenerator() {
     const canvas = qrRef.current.querySelector("canvas");
     if (!canvas) return;
     
-    // Create a new anchor element for downloading without adding to DOM
+    // Create a download link
     const link = document.createElement("a");
-    link.href = canvas.toDataURL("image/png");
-    link.download = "qrcode.png";
     
-    // Use a safer method to trigger download
-    link.click();
-    
-    toast({
-      title: "QR Code Downloaded",
-      description: "Your QR code has been downloaded as PNG",
-    });
+    try {
+      // Set link properties
+      link.href = canvas.toDataURL("image/png");
+      link.download = "qrcode.png";
+      
+      // Append to body, click and remove - all in memory
+      document.body.appendChild(link);
+      link.click();
+      
+      // Small delay before removing to ensure download starts
+      setTimeout(() => {
+        if (document.body.contains(link)) {
+          document.body.removeChild(link);
+        }
+      }, 100);
+      
+      toast({
+        title: "QR Code Downloaded",
+        description: "Your QR code has been downloaded as PNG",
+      });
+    } catch (error) {
+      console.error("Download error:", error);
+      toast({
+        title: "Download Failed",
+        description: "There was an error downloading the QR code",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

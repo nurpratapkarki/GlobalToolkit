@@ -14,33 +14,42 @@ export function QRCodeScanner() {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const scannerDivRef = useRef<HTMLDivElement | null>(null);
+  const mountedRef = useRef(true);
   const { toast } = useToast();
   
   // Initialize scanner when component mounts
   useEffect(() => {
     let scanner: Html5Qrcode | null = null;
     
-    // Only initialize if the element exists in DOM
-    if (scannerDivRef.current) {
-      try {
-        scanner = new Html5Qrcode("qr-reader");
-        scannerRef.current = scanner;
-      } catch (error) {
-        console.error("Error initializing scanner:", error);
+    // Delay initialization to ensure DOM is ready
+    const initTimer = setTimeout(() => {
+      // Only initialize if the element exists in DOM and component is still mounted
+      if (scannerDivRef.current && mountedRef.current) {
+        try {
+          const scannerId = `qr-reader-${Date.now()}`;
+          scannerDivRef.current.id = scannerId;
+          scanner = new Html5Qrcode(scannerId);
+          scannerRef.current = scanner;
+        } catch (error) {
+          console.error("Error initializing scanner:", error);
+        }
       }
-    }
+    }, 100);
 
     // Cleanup on unmount
     return () => {
+      clearTimeout(initTimer);
+      mountedRef.current = false;
+      
       if (scanner) {
         try {
           if (scanner.isScanning) {
-            scanner.stop().catch(console.error);
+            scanner.stop().catch(error => {
+              console.error("Error stopping scanner during cleanup:", error);
+            });
           }
-          setScanActive(false);
-          scannerRef.current = null;
         } catch (error) {
-          console.error("Error cleaning up scanner:", error);
+          console.error("Error during scanner cleanup:", error);
         }
       }
     };
@@ -48,13 +57,15 @@ export function QRCodeScanner() {
 
   // Function to safely stop the scanner
   const stopScannerSafely = async () => {
-    if (scannerRef.current && scannerRef.current.isScanning) {
-      try {
+    if (!scannerRef.current) return;
+    
+    try {
+      if (scannerRef.current.isScanning) {
         await scannerRef.current.stop();
-        setScanActive(false);
-      } catch (error) {
-        console.error("Error stopping scanner:", error);
       }
+      setScanActive(false);
+    } catch (error) {
+      console.error("Error stopping scanner:", error);
     }
   };
 
@@ -72,13 +83,16 @@ export function QRCodeScanner() {
     if (!scannerRef.current) {
       toast({
         title: "Scanner Error",
-        description: "QR code scanner could not be initialized",
+        description: "QR code scanner could not be initialized. Please try again.",
         variant: "destructive",
       });
       return;
     }
     
     try {
+      // Make sure to stop any existing scanning first
+      await stopScannerSafely();
+      
       setScanActive(true);
       setScanResult(null);
       setUploadedImage(null);
@@ -91,25 +105,32 @@ export function QRCodeScanner() {
           aspectRatio: 1.0,
         },
         (decodedText) => {
-          handleScanSuccess(decodedText);
+          if (mountedRef.current) {
+            handleScanSuccess(decodedText);
+          }
         },
         (errorMessage) => {
-          // We don't need to show QR scanning errors to the user
-          console.log(errorMessage);
+          // Don't show scanning errors to the user
+          console.log("Scanning in progress:", errorMessage);
         }
       );
     } catch (err) {
       console.error("Error starting scanner:", err);
-      toast({
-        title: "Camera Error",
-        description: "Could not access the camera. Please check your permissions.",
-        variant: "destructive",
-      });
-      setScanActive(false);
+      
+      if (mountedRef.current) {
+        setScanActive(false);
+        toast({
+          title: "Camera Error",
+          description: "Could not access the camera. Please check your permissions.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
   const handleScanSuccess = async (decodedText: string) => {
+    if (!mountedRef.current) return;
+    
     await stopScannerSafely();
     setScanResult(decodedText);
     toast({
@@ -129,7 +150,7 @@ export function QRCodeScanner() {
     await stopScannerSafely();
     
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !mountedRef.current) return;
     
     // Check if the file is an image
     if (!file.type.match('image.*')) {
@@ -143,6 +164,8 @@ export function QRCodeScanner() {
     
     const reader = new FileReader();
     reader.onload = async (event) => {
+      if (!mountedRef.current) return;
+      
       if (event.target && typeof event.target.result === 'string') {
         setUploadedImage(event.target.result);
         
@@ -157,11 +180,13 @@ export function QRCodeScanner() {
             });
           } catch (error) {
             console.error("QR Code scan error:", error);
-            toast({
-              title: "Scan Failed",
-              description: "Could not detect a valid QR code in the image",
-              variant: "destructive",
-            });
+            if (mountedRef.current) {
+              toast({
+                title: "Scan Failed",
+                description: "Could not detect a valid QR code in the image",
+                variant: "destructive",
+              });
+            }
           }
         }
       }
@@ -216,7 +241,6 @@ export function QRCodeScanner() {
                 </div>
                 
                 <div 
-                  id="qr-reader" 
                   ref={scannerDivRef}
                   className="border rounded-md overflow-hidden"
                   style={{ width: '100%', minHeight: '300px' }}
