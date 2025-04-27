@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { QrReader } from "react-qr-reader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,11 +7,12 @@ import { ExternalLink, RefreshCw, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function QRCodeScanner() {
-  const [scanResult, setScanResult] = useState<string | null>(null);
+  const [scanResult, setScanResult] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
+  const fileInputRef = useRef(null);
   const { toast } = useToast();
 
-  const handleScan = (result: any) => {
+  const handleScan = (result) => {
     if (result) {
       setScanResult(result?.text);
       setIsScanning(false);
@@ -23,7 +23,7 @@ export function QRCodeScanner() {
     }
   };
 
-  const handleScanError = (error: any) => {
+  const handleScanError = (error) => {
     console.error("QR Scanner error:", error);
     toast({
       title: "Scanner Error",
@@ -32,7 +32,7 @@ export function QRCodeScanner() {
     });
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -45,26 +45,17 @@ export function QRCodeScanner() {
       return;
     }
 
-    // Create a FileReader to handle the image upload
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const imageUrl = e.target?.result as string;
-        if (imageUrl) {
-          // The QrReader component will handle the scanning of the uploaded image
-          setIsScanning(true);
-          handleScan({ text: "Uploaded image scanning not supported in this version" });
-        }
-      } catch (error) {
-        console.error("Scanning error:", error);
-        toast({
-          title: "Scanning Failed",
-          description: "Could not detect a QR code in the image",
-          variant: "destructive",
-        });
-      }
-    };
-    reader.readAsDataURL(file);
+    // For file uploads, we can use a third-party library like jsQR
+    // but for this example, let's inform the user about the limitation
+    toast({
+      title: "Feature Limitation",
+      description: "The current version of react-qr-reader doesn't fully support image uploads. Consider upgrading to a newer QR scanning library.",
+    });
+    
+    // Reset the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleReset = () => {
@@ -72,7 +63,7 @@ export function QRCodeScanner() {
     setIsScanning(false);
   };
 
-  const isValidURL = (text: string): boolean => {
+  const isValidURL = (text) => {
     try {
       new URL(text);
       return true;
@@ -105,6 +96,7 @@ export function QRCodeScanner() {
                       onChange={handleFileUpload}
                       className="hidden"
                       id="qr-file-input"
+                      ref={fileInputRef}
                     />
                     <label htmlFor="qr-file-input" className="flex items-center cursor-pointer">
                       <Upload className="mr-2 h-4 w-4" />
@@ -120,8 +112,11 @@ export function QRCodeScanner() {
                         facingMode: "environment"
                       }}
                       onResult={handleScan}
-                      scanDelay={500}
-                      className="w-full h-[300px]"
+                      onError={handleScanError}
+                      scanDelay={300}
+                      videoId="qr-video"
+                      videoStyle={{ width: '100%', height: '300px' }}
+                      className="w-full h-[300px] border rounded-lg overflow-hidden"
                     />
                   </div>
                 )}
