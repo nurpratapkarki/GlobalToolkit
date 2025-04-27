@@ -9,8 +9,7 @@ export function QRCodeTool() {
   const [activeTab, setActiveTab] = useState<string>("generator");
 
   const handleTabChange = (value: string) => {
-    // When switching tabs, the previous tab's components will unmount
-    // and their cleanup effects will run
+    // Changing tabs will unmount the previous tab's components
     setActiveTab(value);
   };
 
@@ -36,6 +35,7 @@ export function QRCodeTool() {
           </TabsContent>
           
           <TabsContent value="scanner" className="animate-fade-in">
+            {/* Only mount scanner component when scanner tab is active */}
             {activeTab === "scanner" && <QRCodeScanner />}
           </TabsContent>
         </Tabs>

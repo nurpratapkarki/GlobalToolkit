@@ -15,6 +15,7 @@ export function QRCodeScanner() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scannerDivRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const scannerInitializedRef = useRef(false);
 
   // Function to check if the scanned text is a URL
   const isValidURL = (text: string): boolean => {
@@ -26,36 +27,46 @@ export function QRCodeScanner() {
     }
   };
 
-  // Initialize scanner on mount
+  // Initialize scanner only once when the component mounts
   useEffect(() => {
-    if (scannerDivRef.current && !scannerRef.current) {
-      scannerRef.current = new Html5Qrcode("qr-reader");
+    // Only initialize if not already done
+    if (scannerDivRef.current && !scannerInitializedRef.current) {
+      try {
+        scannerRef.current = new Html5Qrcode("qr-reader");
+        scannerInitializedRef.current = true;
+      } catch (error) {
+        console.error("Error initializing scanner:", error);
+      }
     }
 
     // Cleanup on unmount
     return () => {
-      if (scannerRef.current && scannerRef.current.isScanning) {
-        scannerRef.current.stop().catch(error => {
-          console.error("Error stopping scanner on unmount:", error);
-        });
+      stopScannerSafely();
+      
+      // Clear the scanner instance
+      if (scannerRef.current) {
+        scannerRef.current = null;
+        scannerInitializedRef.current = false;
       }
     };
   }, []);
 
-  // Make sure the scanner is properly stopped when component unmounts or tab changes
-  useEffect(() => {
-    return () => {
-      if (scannerRef.current && scannerRef.current.isScanning) {
-        scannerRef.current.stop().catch(error => {
-          console.error("Error stopping scanner on cleanup:", error);
-        });
+  // Safe scanner stopping function to prevent DOM errors
+  const stopScannerSafely = async () => {
+    if (scannerRef.current && scannerRef.current.isScanning) {
+      try {
+        await scannerRef.current.stop();
+        setScanActive(false);
+      } catch (error) {
+        console.error("Error stopping scanner:", error);
       }
-    };
-  }, []);
+    }
+  };
 
   const startScanner = async () => {
+    // Make sure the scanner element exists and scanner is initialized
     if (!scannerRef.current || !scannerDivRef.current) {
-      console.error("Scanner refs not initialized");
+      console.error("Scanner not properly initialized");
       return;
     }
     
@@ -89,37 +100,13 @@ export function QRCodeScanner() {
     }
   };
 
-  const stopScanner = async () => {
-    if (scannerRef.current && scannerRef.current.isScanning) {
-      try {
-        await scannerRef.current.stop();
-        setScanActive(false);
-      } catch (error) {
-        console.error("Error stopping scanner:", error);
-      }
-    }
-  };
-
   const handleScanSuccess = async (decodedText: string) => {
-    if (scannerRef.current && scannerRef.current.isScanning) {
-      try {
-        await scannerRef.current.stop();
-        setScanActive(false);
-        setScanResult(decodedText);
-        toast({
-          title: "QR Code Detected",
-          description: "Successfully scanned a QR code",
-        });
-      } catch (error) {
-        console.error("Error stopping scanner after successful scan:", error);
-      }
-    } else {
-      setScanResult(decodedText);
-      toast({
-        title: "QR Code Detected",
-        description: "Successfully scanned a QR code",
-      });
-    }
+    await stopScannerSafely();
+    setScanResult(decodedText);
+    toast({
+      title: "QR Code Detected",
+      description: "Successfully scanned a QR code",
+    });
   };
 
   const handleRestart = () => {
@@ -149,6 +136,10 @@ export function QRCodeScanner() {
         
         if (scannerRef.current) {
           try {
+            // First ensure scanner is stopped
+            await stopScannerSafely();
+            
+            // Then scan the file
             const result = await scannerRef.current.scanFile(file, true);
             setScanResult(result);
             toast({
@@ -198,7 +189,7 @@ export function QRCodeScanner() {
             {!scanResult && (
               <div className="flex flex-col space-y-4">
                 <div className="flex justify-center space-x-4">
-                  <Button onClick={scanActive ? stopScanner : startScanner}>
+                  <Button onClick={scanActive ? stopScannerSafely : startScanner}>
                     <Camera className="mr-2 h-4 w-4" />
                     {scanActive ? "Stop Camera" : "Start Camera"}
                   </Button>
