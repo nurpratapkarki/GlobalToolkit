@@ -8,10 +8,13 @@ import { QRCodeScanner } from "./qrcode/scanner";
 export function QRCodeTool() {
   const [activeTab, setActiveTab] = useState<string>("generator");
 
-  const handleTabChange = (value: string) => {
-    // Changing tabs will unmount the previous tab's components
-    setActiveTab(value);
-  };
+  // Use useEffect to manage cleanup between tab changes
+  useEffect(() => {
+    // This effect runs when the component unmounts or when activeTab changes
+    return () => {
+      // No cleanup needed for unmounting the tool itself
+    };
+  }, [activeTab]);
 
   return (
     <ToolLayout
@@ -22,8 +25,8 @@ export function QRCodeTool() {
         <Tabs
           defaultValue="generator"
           className="w-full"
-          onValueChange={handleTabChange}
           value={activeTab}
+          onValueChange={setActiveTab}
         >
           <TabsList className="grid grid-cols-2 mb-6">
             <TabsTrigger value="generator">Generator</TabsTrigger>
@@ -35,8 +38,7 @@ export function QRCodeTool() {
           </TabsContent>
           
           <TabsContent value="scanner" className="animate-fade-in">
-            {/* Only mount scanner component when scanner tab is active */}
-            {activeTab === "scanner" && <QRCodeScanner />}
+            {activeTab === "scanner" && <QRCodeScanner key="scanner-component" />}
           </TabsContent>
         </Tabs>
       </div>
