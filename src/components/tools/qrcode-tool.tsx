@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { ToolLayout } from "../tool-layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QRCodeGenerator } from "./qrcode/generator";
@@ -6,22 +7,6 @@ import { QRCodeScanner } from "./qrcode/scanner";
 
 export function QRCodeTool() {
   const [activeTab, setActiveTab] = useState<string>("generator");
-
-  // This keeps track of whether components should be mounted
-  const [mountScanner, setMountScanner] = useState(false);
-
-  // Use useEffect to manage scanner mounting with a slight delay
-  useEffect(() => {
-    if (activeTab === "scanner") {
-      // Small delay to ensure clean mounting
-      const timer = setTimeout(() => {
-        setMountScanner(true);
-      }, 50);
-      return () => clearTimeout(timer);
-    } else {
-      setMountScanner(false);
-    }
-  }, [activeTab]);
 
   return (
     <ToolLayout
@@ -45,7 +30,7 @@ export function QRCodeTool() {
           </TabsContent>
           
           <TabsContent value="scanner" className="animate-fade-in">
-            {mountScanner && <QRCodeScanner key={`scanner-${Date.now()}`} />}
+            <QRCodeScanner />
           </TabsContent>
         </Tabs>
       </div>

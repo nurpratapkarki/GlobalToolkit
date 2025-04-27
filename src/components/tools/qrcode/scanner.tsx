@@ -5,71 +5,120 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Camera, ExternalLink, RefreshCw, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Html5Qrcode } from "html5-qrcode";
+import { Html5QrcodeScanner } from "html5-qrcode";
 
 export function QRCodeScanner() {
   const [scanResult, setScanResult] = useState<string | null>(null);
-  const [scanActive, setScanActive] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const scannerDivRef = useRef<HTMLDivElement | null>(null);
-  const mountedRef = useRef(true);
+  const [isScanning, setIsScanning] = useState(false);
+  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const { toast } = useToast();
-  
-  // Initialize scanner when component mounts
-  useEffect(() => {
-    let scanner: Html5Qrcode | null = null;
-    
-    // Delay initialization to ensure DOM is ready
-    const initTimer = setTimeout(() => {
-      // Only initialize if the element exists in DOM and component is still mounted
-      if (scannerDivRef.current && mountedRef.current) {
-        try {
-          const scannerId = `qr-reader-${Date.now()}`;
-          scannerDivRef.current.id = scannerId;
-          scanner = new Html5Qrcode(scannerId);
-          scannerRef.current = scanner;
-        } catch (error) {
-          console.error("Error initializing scanner:", error);
-        }
-      }
-    }, 100);
 
-    // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      clearTimeout(initTimer);
-      mountedRef.current = false;
-      
-      if (scanner) {
-        try {
-          if (scanner.isScanning) {
-            scanner.stop().catch(error => {
-              console.error("Error stopping scanner during cleanup:", error);
-            });
-          }
-        } catch (error) {
-          console.error("Error during scanner cleanup:", error);
-        }
+      // Cleanup scanner on component unmount
+      if (scannerRef.current) {
+        scannerRef.current.clear();
       }
     };
   }, []);
 
-  // Function to safely stop the scanner
-  const stopScannerSafely = async () => {
-    if (!scannerRef.current) return;
-    
+  const initializeScanner = () => {
+    if (scannerRef.current) {
+      scannerRef.current.clear();
+    }
+
     try {
-      if (scannerRef.current.isScanning) {
-        await scannerRef.current.stop();
-      }
-      setScanActive(false);
-    } catch (error) {
-      console.error("Error stopping scanner:", error);
+      scannerRef.current = new Html5QrcodeScanner(
+        "qr-reader",
+        {
+          fps: 10,
+          qrbox: 250,
+          aspectRatio: 1.0,
+          supportedScanTypes: [],
+        },
+        false
+      );
+
+      scannerRef.current.render(
+        (decodedText) => {
+          handleScanSuccess(decodedText);
+        },
+        (errorMessage) => {
+          console.log("QR Code scanning in progress...");
+        }
+      );
+
+      setIsScanning(true);
+      setScanResult(null);
+    } catch (err) {
+      console.error("Scanner initialization error:", err);
+      toast({
+        title: "Scanner Error",
+        description: "Could not initialize the QR code scanner. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
-  // Function to check if the scanned text is a URL
+  const handleScanSuccess = (decodedText: string) => {
+    if (scannerRef.current) {
+      scannerRef.current.clear();
+    }
+    setIsScanning(false);
+    setScanResult(decodedText);
+    toast({
+      title: "Success",
+      description: "QR Code scanned successfully",
+    });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Create a new scanner instance for file scanning
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+      "qr-reader-file",
+      { fps: 10, qrbox: 250, supportedScanTypes: [] },
+      false
+    );
+
+    try {
+      const imageUrl = URL.createObjectURL(file);
+      await html5QrcodeScanner.render();
+      
+      const result = await html5QrcodeScanner.scanFile(file);
+      handleScanSuccess(result);
+    } catch (error) {
+      console.error("Scanning error:", error);
+      toast({
+        title: "Scanning Failed",
+        description: "Could not detect a QR code in the image",
+        variant: "destructive",
+      });
+    } finally {
+      html5QrcodeScanner.clear();
+      URL.revokeObjectURL(imageUrl);
+    }
+  };
+
+  const handleReset = () => {
+    setScanResult(null);
+    setIsScanning(false);
+    if (scannerRef.current) {
+      scannerRef.current.clear();
+    }
+  };
+
   const isValidURL = (text: string): boolean => {
     try {
       new URL(text);
@@ -77,136 +126,6 @@ export function QRCodeScanner() {
     } catch (e) {
       return false;
     }
-  };
-
-  const startScanner = async () => {
-    if (!scannerRef.current) {
-      toast({
-        title: "Scanner Error",
-        description: "QR code scanner could not be initialized. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    try {
-      // Make sure to stop any existing scanning first
-      await stopScannerSafely();
-      
-      setScanActive(true);
-      setScanResult(null);
-      setUploadedImage(null);
-      
-      await scannerRef.current.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-        },
-        (decodedText) => {
-          if (mountedRef.current) {
-            handleScanSuccess(decodedText);
-          }
-        },
-        (errorMessage) => {
-          // Don't show scanning errors to the user
-          console.log("Scanning in progress:", errorMessage);
-        }
-      );
-    } catch (err) {
-      console.error("Error starting scanner:", err);
-      
-      if (mountedRef.current) {
-        setScanActive(false);
-        toast({
-          title: "Camera Error",
-          description: "Could not access the camera. Please check your permissions.",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const handleScanSuccess = async (decodedText: string) => {
-    if (!mountedRef.current) return;
-    
-    await stopScannerSafely();
-    setScanResult(decodedText);
-    toast({
-      title: "QR Code Detected",
-      description: "Successfully scanned a QR code",
-    });
-  };
-
-  const handleRestart = async () => {
-    setScanResult(null);
-    setUploadedImage(null);
-    await startScanner();
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    // First ensure scanner is stopped
-    await stopScannerSafely();
-    
-    const file = e.target.files?.[0];
-    if (!file || !mountedRef.current) return;
-    
-    // Check if the file is an image
-    if (!file.type.match('image.*')) {
-      toast({
-        title: "Invalid File Type",
-        description: "Please upload an image file (PNG, JPG, JPEG, WEBP)",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      if (!mountedRef.current) return;
-      
-      if (event.target && typeof event.target.result === 'string') {
-        setUploadedImage(event.target.result);
-        
-        if (scannerRef.current) {
-          try {
-            // Scan the file
-            const result = await scannerRef.current.scanFile(file, true);
-            setScanResult(result);
-            toast({
-              title: "QR Code Detected",
-              description: "Successfully scanned the QR code from the image",
-            });
-          } catch (error) {
-            console.error("QR Code scan error:", error);
-            if (mountedRef.current) {
-              toast({
-                title: "Scan Failed",
-                description: "Could not detect a valid QR code in the image",
-                variant: "destructive",
-              });
-            }
-          }
-        }
-      }
-    };
-    reader.readAsDataURL(file);
-    
-    // Reset the input value to allow uploading the same file again
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const triggerFileUpload = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const openURL = (url: string) => {
-    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -223,64 +142,56 @@ export function QRCodeScanner() {
             {!scanResult && (
               <div className="flex flex-col space-y-4">
                 <div className="flex justify-center space-x-4">
-                  <Button onClick={scanActive ? stopScannerSafely : startScanner}>
+                  <Button onClick={isScanning ? handleReset : initializeScanner}>
                     <Camera className="mr-2 h-4 w-4" />
-                    {scanActive ? "Stop Camera" : "Start Camera"}
+                    {isScanning ? "Stop Camera" : "Start Camera"}
                   </Button>
-                  <Button variant="outline" onClick={triggerFileUpload}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload Image
+                  <Button variant="outline">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="qr-file-input"
+                    />
+                    <label htmlFor="qr-file-input" className="flex items-center cursor-pointer">
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Image
+                    </label>
                   </Button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileUpload}
-                    accept="image/png, image/jpeg, image/jpg, image/webp"
-                    style={{ display: 'none' }}
-                  />
                 </div>
-                
+
                 <div 
-                  ref={scannerDivRef}
-                  className="border rounded-md overflow-hidden"
-                  style={{ width: '100%', minHeight: '300px' }}
+                  id="qr-reader"
+                  className="w-full min-h-[300px] border rounded-lg overflow-hidden bg-muted/30"
                 >
-                  {!scanActive && !uploadedImage && (
-                    <div className="w-full h-full min-h-[300px] flex flex-col items-center justify-center bg-muted/30">
+                  {!isScanning && (
+                    <div className="w-full h-full min-h-[300px] flex flex-col items-center justify-center">
                       <Camera className="h-16 w-16 text-muted-foreground mb-4" />
                       <p className="text-muted-foreground text-center px-4">
                         Start the camera or upload an image to scan a QR code
                       </p>
                     </div>
                   )}
-                  
-                  {uploadedImage && (
-                    <div className="relative w-full flex justify-center p-4">
-                      <img 
-                        src={uploadedImage} 
-                        alt="Uploaded QR" 
-                        className="max-w-full max-h-[400px] object-contain"
-                      />
-                    </div>
-                  )}
                 </div>
+                <div id="qr-reader-file" className="hidden"></div>
               </div>
             )}
-            
+
             {scanResult && (
-              <Alert className="animate-fade-in">
+              <Alert>
                 <AlertTitle>QR Code Content</AlertTitle>
                 <AlertDescription className="space-y-4">
                   <div className="p-4 bg-muted/30 rounded break-all">
                     {scanResult}
                   </div>
                   <div className="flex space-x-3">
-                    <Button onClick={handleRestart} variant="outline">
+                    <Button onClick={handleReset} variant="outline">
                       <RefreshCw className="mr-2 h-4 w-4" />
                       Scan Another
                     </Button>
                     {isValidURL(scanResult) && (
-                      <Button onClick={() => openURL(scanResult)}>
+                      <Button onClick={() => window.open(scanResult, "_blank", "noopener,noreferrer")}>
                         <ExternalLink className="mr-2 h-4 w-4" />
                         Open URL
                       </Button>
