@@ -23,7 +23,7 @@ export function QRCodeScanner() {
     }
   };
 
-  const handleError = (error: any) => {
+  const handleScanError = (error: any) => {
     console.error("QR Scanner error:", error);
     toast({
       title: "Scanner Error",
@@ -120,7 +120,7 @@ export function QRCodeScanner() {
                         facingMode: "environment"
                       }}
                       onResult={handleScan}
-                      onError={handleError}
+                      scanDelay={500}
                       className="w-full h-[300px]"
                     />
                   </div>
