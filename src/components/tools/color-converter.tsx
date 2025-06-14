@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ToolLayout } from "@/components/tool-layout";
 import { Input } from "@/components/ui/input";
@@ -99,6 +98,18 @@ export function ColorConverter() {
     const newColor = tinycolor(colorObj);
     newColor.setAlpha(newAlpha);
     setColorObj(newColor);
+  };
+
+  const handleColorPickerChange = (e) => {
+    const newColor = tinycolor(e.target.value);
+    if (newColor.isValid()) {
+      newColor.setAlpha(draft.alpha);
+      setColorObj(newColor);
+      toast({
+        title: "Color Updated",
+        description: `Color changed to ${newColor.toHexString()}`,
+      });
+    }
   };
 
   const copyToClipboard = (text, label) => {
@@ -296,32 +307,40 @@ export function ColorConverter() {
                       <span>Alpha: {draft.alpha.toFixed(2)}</span>
                       <span>{Math.round(draft.alpha * 100)}%</span>
                     </Label>
-                    <Input 
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value={draft.alpha}
-                      onChange={(e) => handleAlphaChange(e.target.value)}
+                    <Slider
+                      value={[draft.alpha]}
+                      onValueChange={(value) => handleAlphaChange(value[0])}
                       onFocus={() => setEditing('alpha')}
                       onBlur={() => setEditing(null)}
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      className="w-full"
                     />
                   </div>
 
                   <div className="flex gap-2">
-                    <Input
-                      type="color"
-                      value={hex}
-                      onChange={(e) => setColorObj(tinycolor(e.target.value).setAlpha(draft.alpha))}
-                      className="h-12"
-                    />
-                    <div className="grid grid-cols-4 gap-2 w-full">
+                    <div className="relative">
+                      <input
+                        type="color"
+                        value={hex}
+                        onChange={handleColorPickerChange}
+                        className="h-12 w-16 rounded border border-input cursor-pointer"
+                        title="Pick a color"
+                      />
+                      <Pipette className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 flex-1">
                       {["#f44336", "#2196f3", "#4caf50", "#ffeb3b"].map((color) => (
                         <Button
                           key={color}
                           style={{ backgroundColor: color }}
-                          className="w-full h-12"
-                          onClick={() => setColorObj(tinycolor(color).setAlpha(draft.alpha))}
+                          className="w-full h-12 border border-input"
+                          onClick={() => {
+                            const newColor = tinycolor(color);
+                            newColor.setAlpha(draft.alpha);
+                            setColorObj(newColor);
+                          }}
                         />
                       ))}
                     </div>
@@ -356,7 +375,7 @@ export function ColorConverter() {
                       <div key={index} className="flex flex-col items-center">
                         <div 
                           style={{ backgroundColor: color.toHexString() }} 
-                          className="w-16 h-16 rounded cursor-pointer"
+                          className="w-16 h-16 rounded cursor-pointer border border-input"
                           onClick={() => setColorObj(color)}
                         />
                         <div className="text-center mt-1 text-xs font-mono">
@@ -391,7 +410,7 @@ export function ColorConverter() {
                       <div key={`darken-${index}`} className="flex flex-col items-center">
                         <div 
                           style={{ backgroundColor: color.toHexString() }} 
-                          className="w-16 h-16 rounded cursor-pointer"
+                          className="w-16 h-16 rounded cursor-pointer border border-input"
                           onClick={() => setColorObj(color)}
                         />
                         <div className="text-center mt-1 text-xs font-mono">
@@ -417,7 +436,7 @@ export function ColorConverter() {
                       <div key={`lighten-${index}`} className="flex flex-col items-center">
                         <div 
                           style={{ backgroundColor: color.toHexString() }} 
-                          className="w-16 h-16 rounded cursor-pointer"
+                          className="w-16 h-16 rounded cursor-pointer border border-input"
                           onClick={() => setColorObj(color)}
                         />
                         <div className="text-center mt-1 text-xs font-mono">
@@ -443,7 +462,7 @@ export function ColorConverter() {
                       <div key={`saturate-${index}`} className="flex flex-col items-center">
                         <div 
                           style={{ backgroundColor: color.toHexString() }} 
-                          className="w-16 h-16 rounded cursor-pointer"
+                          className="w-16 h-16 rounded cursor-pointer border border-input"
                           onClick={() => setColorObj(color)}
                         />
                         <div className="text-center mt-1 text-xs font-mono">
@@ -469,7 +488,7 @@ export function ColorConverter() {
                       <div key={`desaturate-${index}`} className="flex flex-col items-center">
                         <div 
                           style={{ backgroundColor: color.toHexString() }} 
-                          className="w-16 h-16 rounded cursor-pointer"
+                          className="w-16 h-16 rounded cursor-pointer border border-input"
                           onClick={() => setColorObj(color)}
                         />
                         <div className="text-center mt-1 text-xs font-mono">
@@ -537,7 +556,7 @@ export function ColorConverter() {
                   <div className="grid grid-cols-2 gap-4">
                     <div 
                       style={{ backgroundColor: 'white', color: colorObj.toRgbString() }} 
-                      className="p-4 rounded"
+                      className="p-4 rounded border"
                     >
                       <h4 className="font-bold mb-2">On White Background</h4>
                       <p>This is normal text</p>
@@ -546,7 +565,7 @@ export function ColorConverter() {
                     
                     <div 
                       style={{ backgroundColor: 'black', color: colorObj.toRgbString() }} 
-                      className="p-4 rounded"
+                      className="p-4 rounded border"
                     >
                       <h4 className="font-bold mb-2">On Black Background</h4>
                       <p>This is normal text</p>
@@ -555,7 +574,7 @@ export function ColorConverter() {
                     
                     <div 
                       style={{ backgroundColor: colorObj.toRgbString(), color: 'white' }} 
-                      className="p-4 rounded"
+                      className="p-4 rounded border"
                     >
                       <h4 className="font-bold mb-2">White Text on This Color</h4>
                       <p>This is normal text</p>
@@ -564,7 +583,7 @@ export function ColorConverter() {
                     
                     <div 
                       style={{ backgroundColor: colorObj.toRgbString(), color: 'black' }} 
-                      className="p-4 rounded"
+                      className="p-4 rounded border"
                     >
                       <h4 className="font-bold mb-2">Black Text on This Color</h4>
                       <p>This is normal text</p>
