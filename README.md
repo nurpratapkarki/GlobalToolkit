@@ -1,37 +1,54 @@
-# Welcome to the project
+# DevToolkit — All-in-One Developer Toolbox
 
-## How can I edit this code?
+**DevToolkit** is a fast, lightweight, and distraction-free suite of essential tools built specifically for developers. Whether you're formatting JSON, testing regex, decoding JWTs, or converting color codes, DevToolkit brings all your everyday dev utilities into a single, elegant web app.
 
-There are several ways of editing your application.
+---
 
+##  Why DevToolkit?
 
-**Use your preferred IDE**
+In the modern workflow, developers often find themselves bouncing between multiple online tools—most of which are bloated, ad-ridden, or just plain slow. DevToolkit was built to fix that.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+It’s:
+- **Frontend-only**: No backend, no servers, no data tracking.
+- **Blazingly fast**: Powered by Vite + React for instant load and zero lag.
+- **Modular**: Add new tools as you go, easily maintainable and scalable.
+- **Offline-ready**: Works as a standalone static app — deploy anywhere.
+- **Clean & minimal**: No ads, no fluff, just tools.
 
-Follow these steps:
+---
 
+## Included Tools
 
-**Edit a file directly in GitHub**
+- **JSON Formatter & Validator**
+- **Regex Tester** (live highlighting)
+- **UUID Generator** (v1 & v4)
+- **Markdown Previewer**
+- **JWT Decoder** (header & payload breakdown)
+- **Base64 Encoder/Decoder**
+- **Color Converter** (Hex ↔ RGB ↔ HSL)
+- **CSS Gradient Generator**
+- **Format Converters** (Binary, Decimal, Hex, String)
+- **Global Settings Panel** (Dark mode, preferences)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+##  Tech Stack
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- [React](https://react.dev/)
+- [Vite](https://vitejs.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [LocalStorage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) for persistent user preferences
+No backend. No database. Fully browser-powered.
+---
+## Getting Started
 
-## What technologies are used for this project?
+```bash
+# Clone the repo
+git clone https://github.com/nurpratapkarki/GlobalToolkit.git
+cd DevToolkit
 
-This project is built with:
+# Install dependencies
+npm install
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind Css
+# Run locally
+npm run dev
